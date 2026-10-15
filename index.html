@@ -49,7 +49,7 @@ function calc(f){const m=mods(f),g=f.grim?1:0,p=n=>f.per[n]||0,s5=n=>2*Math.floo
 const lv=5+Math.floor(f.exp/5),c={a,lv,pv:15+5*a.vig+s5('Fortitude')+10*Math.floor(lv/5)+(m.vitalidade||0),def:10+(m.protecao||0)+(m.defesa||0),per:10+a.sen+p('Sensações')+(m.percepcao||0),mn:5+2*a.int+s5('Controle')+(m.mana||0),es:5+a.des+s5('Luta')+(m.estamina||0),car:5+2*a.for+s5('Atletismo')+(m.carga||0),peso:2+f.ite.reduce((t,i)=>t+(+i.peso||0),0)};
 c.san=(f.san!=null?f.san:2*a.int+Math.floor(lv/5))+(g?3:0)+(m.san||0);return c}
 const cur=(f,k,max)=>f.cur[k]==null?max:Math.min(f.cur[k],max);
-function pts(f){const total=2*(5+Math.floor(f.exp/5)),at=AT.map(([k,e,n])=>[e+' '+n,2*(f.base[k]-1)]),pe=Object.entries(f.per).filter(e=>e[1]>0).map(e=>[e[0],e[1]/5]),ta=f.tal.length*3,sa=at.reduce((t,x)=>t+x[1],0),sp=pe.reduce((t,x)=>t+x[1],0);return{total,at,pe,ta,sa,sp,used:sa+sp+ta,left:total-sa-sp-ta}}
+function pts(f){const total=2*(5+Math.floor(f.exp/5)),at=AT.map(([k,e,n])=>[e+' '+n,2*(f.base[k]-1)]),pe=Object.entries(f.per).filter(e=>e[1]>0).map(e=>[e[0],e[1]/5]),ta=f.tal.length*3,sa=at.reduce((t,x)=>t+x[1],0),sp=pe.reduce((t,x)=>t+x[1],0),mh=f.mag.reduce((n,m)=>n+2*Math.max(1,+m.est||1),0)+f.hab.reduce((n,m)=>n+2*Math.max(1,+m.est||1),0);return{total,at,pe,ta,sa,sp,mh,used:sa+sp+ta+mh,left:total-sa-sp-ta-mh}}
 const stars=(m,f)=>'⭐'.repeat(Math.min(9,(m.est||1)+(f.grim?2:0)));
 const pr=m=>m.pr!==''&&m.pr!=null?m.pr:Math.round(Math.max(dmax(m.dano),num(m.custo))/(m.gri?3:5));
 function reqMiss(f,r){const c=calc(f),X={nivel:c.lv};AT.forEach(([k,,n])=>{X[k]=X[nm(n)]=c.a[k]});const out=[];String(r||'').replace(/([a-zA-ZÀ-ú]+)\s*>=?\s*(-?\d+)/g,(_,k,n)=>{let v=X[nm(k)];if(v==null){const p=ALL.concat(f.custom).find(x=>nm(x)==nm(k));v=p?f.per[p]||0:0}if(v<+n)out.push(`${k} ${n} (tem ${v})`)});return out}
@@ -65,7 +65,7 @@ const tabs=[['geral','⚙️ Geral'],['per','🎓 Perícias'],...Object.entries(
 return`<div class=r>${tabs.map(([k,n])=>`<button data-a=tab data-i=${k} class="${FT==k?'on':''}">${n}</button>`).join('')}</div>`+(FT=='geral'?eGeral(f):FT=='per'?ePer(f):eList(f,FT))}
 function eGeral(f){const c=calc(f),p=pts(f),b=(k,mx)=>`<div class=bar><i style="width:${Math.max(0,100*cur(f,k,mx)/mx)}%"></i></div>`;
 return`<div class=c><div class=r><label>Nome ${I('nome',f.nome)}</label><label>Idade ${N('idade',f.idade)}</label><label>EXP ${N('exp',f.exp,'min=0')}</label><b>🎖️ Nível ${c.lv}</b><span class=m>(5 exp = 1 nível)</span></div></div>
-<div class=c><h3>✨ Pontos de melhoria</h3><p>Total <b>${p.total}</b> · Gastos <b>${fx(p.used)}</b> · Restantes <b class="${p.left<0?'warn':''}">${fx(p.left)}</b></p><p class=m>💪 Atributos: ${fx(p.sa)} (${p.at.filter(x=>x[1]).map(x=>x[0]+' '+x[1]).join(', ')||'nenhum'})<br>🎓 Perícias: ${fx(p.sp)} (${p.pe.map(x=>x[0]+' '+fx(x[1])).join(', ')||'nenhuma'})<br>🏅 Talentos: ${p.ta} (${f.tal.map(t=>q(t.nome)).join(', ')||'nenhum'})</p></div>
+<div class=c><h3>✨ Pontos de melhoria</h3><p>Total <b>${p.total}</b> · Gastos <b>${fx(p.used)}</b> · Restantes <b class="${p.left<0?'warn':''}">${fx(p.left)}</b></p><p class=m>💪 Atributos: ${fx(p.sa)} (${p.at.filter(x=>x[1]).map(x=>x[0]+' '+x[1]).join(', ')||'nenhum'})<br>🎓 Perícias: ${fx(p.sp)} (${p.pe.map(x=>x[0]+' '+fx(x[1])).join(', ')||'nenhuma'})<br>✨ Magias e habilidades: ${p.mh} pts<br>🏅 Talentos: ${p.ta} (${f.tal.map(t=>q(t.nome)).join(', ')||'nenhum'})</p></div>
 <div class=c><h3>Atributos base</h3><div class=g>${AT.map(([k,e,n])=>`<div class=r>${e} ${n} <button data-a=at data-k=${k} data-d=-1>−</button><b>${f.base[k]}</b>${f.grim?`<span class=m>(+1 grimório = ${c.a[k]})</span>`:''}<button data-a=at data-k=${k} data-d=1>+2pts</button></div>`).join('')}</div>
 <div class=r><label>🌀 Sanidade ${N('san',f.san,'placeholder=auto')}</label><b>= ${c.san}</b><span class=m>(vazio = 2×intelecto + nível/5${f.grim?' + 3 temporária':''})</span></div></div>
 <div class=c><h3>Atributos secundários</h3><div class=g>
@@ -78,7 +78,8 @@ function eList(f,t){return`<div class=c><div class=r><h3>${TN[t]}</h3><button cl
 function vP(){const l=fichas.filter(f=>f.owner==U);return`<h2>📢 Publicar</h2><p class=m>O que você publica fica disponível para todos no repositório.</p>`+l.map(f=>`<div class=c><div class=r><b>${q(f.nome)}</b><span class=s></span><button data-a=pubf data-i=${f.id}>${f.acc.all?'🌍 Já pública':'📢 Publicar ficha para todos'}</button></div>${Object.keys(TN).map(t=>f[t].map((m,i)=>`<div class=r>${TN[t].split(' ')[0]} ${q(m.nome)}<span class=s></span><button data-a=pubx data-f2=${f.id} data-t=${t} data-i=${i}>📢 Publicar</button></div>`).join('')).join('')}</div>`).join('')||'<p class=c>Você ainda não criou fichas.</p>'}
 function vR(){return`<h2>📚 Repositório público</h2><p class=m>Adicione à ficha aberta no Editor.</p>`+Object.keys(TN).map(t=>`<div class=c><h3>${TN[t]}</h3>${repo[t].map((m,i)=>`<div class=r><b>${q(m.nome)}</b><span class=m>por ${q(m.autor)} · ${q(m.desc)}${m.req?' · Req: '+q(m.req):''}</span><span class=s></span><button data-a=take data-t=${t} data-i=${i}>➕ Pegar</button>${m.autor==U?`<button class=d data-a=rmrepo data-t=${t} data-i=${i}>🗑️</button>`:''}</div>`).join('')||'<span class=m>Nada publicado.</span>'}</div>`).join('')}
 /* ---- combate ---- */
-const part=f=>{const c=calc(f);return{id:uid(),fid:f.id,nome:f.nome,pv:cur(f,'pv',c.pv),pvm:c.pv,mn:cur(f,'mn',c.mn),mnm:c.mn,es:cur(f,'es',c.es),esm:c.es,def:c.def,for:c.a.for,vig:c.a.vig,des:c.a.des,ni:Math.max(1,c.a.des+(f.per.Iniciativa||0)),ini:0,out:false}};
+const part=f=>{const c=calc(f);return{id:uid(),fid:f.id,nome:f.nome,pv:cur(f,'pv',c.pv),pvm:c.pv,mn:cur(f,'mn',c.mn),mnm:c.mn,es:cur(f,'es',c.es),esm:c.es,def:c.def,for:c.a.for,vig:c.a.vig,des:c.a.des,ni:Math.max(1,c.a.des),iniBonus:f.per.Iniciativa||0,ini:0,out:false}};
+const rollInit=p=>{let best=0;for(let i=0;i<Math.max(1,p.ni);i++)best=Math.max(best,rl(20));return best+(p.iniBonus||0)};
 const opts=(f,t)=>t=='per'?Object.entries(f.per).filter(e=>e[1]>0).map(e=>({nome:e[0],b:e[1]})):(f[t]||[]).filter(x=>!(t=='mag'&&x.gri&&!f.grim)).map(x=>({...x,b:0}));
 function fill(f){const e=f&&AS.tipo!='pular'?opts(f,AS.tipo)[AS.sel]:null;AS.dmg=e&&e.dano||'';AS.roll=e&&e.b?'1d20+'+Math.floor(e.b/5):'1d20'}
 function nextT(){const P=C.parts;let i=P.findIndex(p=>p.id==C.turn);for(let n=0;n<P.length;n++){i++;if(i>=P.length){i=0;C.round++;C.log.unshift('🔔 Rodada:'+C.round);toast('Rodada:'+C.round)}if(!P[i].out){C.turn=P[i].id;return}}}
@@ -132,15 +133,16 @@ savef:()=>{const f=F(),{t,i}=MF,o={};FD[t].forEach(k=>o[k]=$('#mf_'+k).value.tri
 const miss=RQ[t].filter(k=>!o[k]);if(miss.length)return alert('Preencha: '+miss.map(k=>LB[k].split(' (')[0]).join(', '));
 if('est'in o)o.est=Math.min(5,Math.max(1,+o.est||1));
 if(t=='tal'){const m=reqMiss(f,o.req);if(m.length)return alert('Requisitos não cumpridos: '+m.join(', '));if(i<0&&pts(f).left<3&&!confirm('Faltam pontos (talento custa 3). Adicionar mesmo assim?'))return}
+if(t=='mag'||t=='hab'){const before=i>=0?2*Math.max(1,+F()[t][i].est||1):0,after=2*Math.max(1,+o.est||1),delta=after-before;if(delta>pts(f).left)return alert('Pontos de melhoria insuficientes. Esta magia/habilidade custa '+after+' pontos no total; faltam '+(delta-pts(f).left)+'.')}
 if(i>=0){const old=f[t][i];o.versoes=old.est!=null&&old.est!=o.est?[...(old.versoes||[]),{...old,versoes:undefined}]:old.versoes;f[t][i]=o}else f[t].push(o);
 if(t=='tal'&&i<0&&!repo.tal.some(x=>x.nome==o.nome))repo.tal.push({...o,autor:U,rid:uid()});$('#md').close();sv()},
 take:(d,f)=>{f=F();if(!f||!can(f))return alert('Abra uma ficha no Editor primeiro.');const m={...repo[d.t][d.i]};delete m.autor;delete m.rid;
 if(d.t=='tal'){const x=reqMiss(f,m.req);if(x.length)return alert('Requisitos não cumpridos: '+x.join(', '))}f[d.t].push(m);sv();toast('Adicionado à ficha!')},
 rmrepo:d=>{repo[d.t].splice(d.i,1);sv()},
-join:d=>{const f=fichas.find(x=>x.id==d.i),p=part(f);if(C.on){p.ini=roll(p.ni+'d10');C.log.unshift('➕ '+p.nome+' entrou (iniciativa '+p.ini+')')}C.parts.push(p);if(C.on)C.parts.sort((a,b)=>b.ini-a.ini);sv()},
+join:d=>{const f=fichas.find(x=>x.id==d.i),p=part(f);if(C.on){p.ini=rollInit(p);C.log.unshift('➕ '+p.nome+' entrou (maior de '+p.ni+'d20 + perícia '+(p.iniBonus||0)+' = '+p.ini+')')}C.parts.push(p);if(C.on)C.parts.sort((a,b)=>b.ini-a.ini);sv()},
 out:d=>{const p=C.parts.find(x=>x.id==d.i);p.out=!p.out;C.log.unshift((p.out?'🚪 ':'↩️ ')+p.nome+(p.out?' saiu':' voltou'));if(p.out&&C.turn==p.id)nextT();sv()},
 rm:d=>{if(C.turn==d.i)nextT();C.parts=C.parts.filter(x=>x.id!=d.i);sv()},
-start:()=>{if(!C.parts.length)return alert('Coloque fichas no combate primeiro.');C.on=true;C.round=1;C.log=['⚔️ Combate iniciado! Rodada:1'];C.parts.forEach(p=>{p.ini=roll(p.ni+'d10');C.log.push('🎲 '+p.nome+': '+p.ni+'d10 = '+p.ini)});C.parts.sort((a,b)=>b.ini-a.ini);C.turn=(C.parts.find(p=>!p.out)||{}).id;AS.sel=0;fill(fichas.find(f=>f.id==(C.parts[0]||{}).fid));toast('Rodada:1');sv()},
+start:()=>{if(!C.parts.length)return alert('Coloque fichas no combate primeiro.');C.on=true;C.round=1;C.log=['⚔️ Combate iniciado! Rodada:1'];C.parts.forEach(p=>{p.ini=rollInit(p);C.log.push('🎲 '+p.nome+': maior de '+p.ni+'d20 + perícia ('+(p.iniBonus||0)+') = '+p.ini)});C.parts.sort((a,b)=>b.ini-a.ini);C.turn=(C.parts.find(p=>!p.out)||{}).id;AS.sel=0;fill(fichas.find(f=>f.id==(C.parts[0]||{}).fid));toast('Rodada:1');sv()},
 end:()=>{C.on=false;C.turn=null;C.log.unshift('🏁 Combate encerrado');sv()},
 rt:()=>{AS.roll=String(roll(AS.roll||'1d20'));draw()},rd:()=>{AS.dmg=String(roll(AS.dmg||0));draw()},act};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&ACT[b.dataset.a])ACT[b.dataset.a](b.dataset,F())});
@@ -155,3 +157,4 @@ draw()});
 addEventListener('storage',()=>{load();draw()});
 load();if(!U){U=(prompt('Bem-vindo(a) ao Tellus! Seu nome de usuário:')||'Jogador').trim();localStorage.setItem('tl_u',U)}if(!users.includes(U)){users.push(U);save()}draw();
 </script></body></html>
+
