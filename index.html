@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Criador de Fichas de RPG</title>
+<style>
+:root{color-scheme:dark;--bg:#0f111b;--panel:#171a28;--card:#1f2336;--ink:#e9eaf5;--mut:#9ba1bb;--line:#2f3550;--acc:#8b6cf0;--gold:#f2c75c;--bad:#ff6b81;--vit:#ef5b73;--mana:#4aa8ff;--est:#4cc38a;--r:10px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:radial-gradient(900px 420px at 50% -120px,#2b2358 0,transparent 70%) no-repeat,var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}
+h1,h2,h3{font-family:"Palatino Linotype",Palatino,Georgia,serif;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+header{background:#0a0c14ee;backdrop-filter:blur(6px);border-bottom:1px solid var(--line);color:#fff;padding:12px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;position:sticky;top:0;z-index:5}
+header h1{font-size:1.3rem;margin-right:auto}
+header nav{display:flex;gap:4px}
+header button.sec{color:#fff;border-color:#ffffff66}
+header button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+header input{width:150px}
+header #quem{display:flex;gap:8px;align-items:center}
+button{background:var(--acc);color:#fff;border:0;border-radius:var(--r);padding:6px 12px;cursor:pointer}
+button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.x{background:transparent;color:var(--bad);padding:2px 8px}
+button:disabled{opacity:.4;cursor:default}
+input,select,textarea{border:1px solid var(--line);border-radius:var(--r);padding:5px 8px;background:#0f1220;width:100%}
+:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+main{max-width:1120px;margin:0 auto;padding:20px}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+section.p{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
+section.p>h2{font-size:1.15rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h3{margin:14px 0 8px}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.g2{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+label{display:block;font-size:.85rem;color:var(--mut)}
+label input,label textarea{margin-top:2px;color:var(--ink)}
+.mut,small{color:var(--mut);font-size:.85rem}
+.bad{color:var(--bad)}
+.aviso{background:#3a1f2b;border:1px solid var(--bad);border-radius:var(--r);padding:8px 12px}
+.at,.st{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px}
+.at{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.at .ctl{display:flex;align-items:center;gap:8px}
+.at b,.st>b,.st div b{font-size:1.3rem;font-family:Georgia,serif}
+.st>span{display:block;font-size:.85rem;color:var(--mut)}
+.st input{width:70px;display:inline-block}
+.pg{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.pc{display:flex;flex-direction:column;gap:4px;border-left:3px solid var(--line);padding-left:10px}
+.pr{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--ink);font-size:.92rem}
+.pr input{width:62px;margin:0}
+.cd{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:10px}
+.cd p{margin:4px 0}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.star{color:var(--gold);letter-spacing:2px}
+.bt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.bt input{width:auto;flex:1;min-width:130px}
+.ck{display:flex;gap:6px;align-items:center;color:var(--ink)}
+.ck input{width:auto}
+.tag{background:var(--bad);color:#fff;border-radius:var(--r);padding:1px 8px;font-size:.8rem}
+details{margin-top:6px}
+.ver{border-left:3px solid var(--gold);padding-left:8px;font-size:.88rem}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);padding:18px;width:min(520px,92vw)}
+dialog::backdrop{background:#1b243888}
+dialog label{margin-top:8px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2c3252;color:#fff;padding:8px 16px;border-radius:var(--r);z-index:20}
+.st.vit{border-left:4px solid var(--vit)}.st.mana{border-left:4px solid var(--mana)}.st.est{border-left:4px solid var(--est)}
+.bar{height:6px;border-radius:4px;background:#0f1220;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;border-radius:4px}
+.st.vit i{background:var(--vit)}.st.mana i{background:var(--mana)}.st.est i{background:var(--est)}
+.gi{font-size:1.3rem;line-height:1}
+.bt select{width:auto}
+button:hover{filter:brightness(1.15)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎲 Criador de Fichas</h1>
+  <nav>
+    <button class="sec" data-act="tab" data-t="ficha">📜 Ficha</button>
+    <button class="sec" data-act="tab" data-t="fichas">🗂️ Fichas salvas</button>
+    <button class="sec" data-act="tab" data-t="repo">📚 Repositório</button>
+  </nav>
+  <div id="quem"></div>
+</header>
+<main>
+  <div id="ficha"></div>
+  <div id="fichas" hidden></div>
+  <div id="repo" hidden></div>
+</main>
+<dialog id="dlg"><form id="frm"></form></dialog>
+<div id="toast" hidden></div>
+
+<script>
+/* ===== Dados do sistema ===== */
+const ATTR=['forca','destreza','sentidos','vigor','intelecto'];
+const AN={forca:'Força',destreza:'Destreza',sentidos:'Sentidos',vigor:'Vigor',intelecto:'Intelecto'};
+const AI={forca:'💪',destreza:'🏹',sentidos:'👁️',vigor:'🫀',intelecto:'🧠'};
+const GI=['💪','📚','🗣️','🫀','🤸','🔮','🧩'];
+const PER=[
+ ['Atletismo','Escalada','Impacto','Intimidação','Luta','Natação','Estabilidade'],
+ ['Artes','Ciências','Conhecimento','Enganação','Intelecto','Investigação','Medicina','Profissão','Tecnologia'],
+ ['Adestramento','Carisma','Diplomacia','Intuição','Percepção','Religião','Sensações'],
+ ['Concentração','Fortitude','Infinidade','Sobrevivência','Tenacidade','Vigor','Vontade'],
+ ['Acrobacia','Condução','Destreza','Furtividade','Iniciativa','Pontaria','Reflexos'],
+ ['Arcanismo','Controle','Criação','Emissão','Invocação','Ocultismo','Ritualismo','Selamento','Suporte','Transformação']];
+const TALC=3, PMAX=35;
+const GRIM=()=>({nome:'Grimório',peso:2,custo:'',dano:'',desc:'',efeito:'+1 em todos os atributos base, +3 de sanidade temporária e +2 estrelas nas magias enquanto ligado.',mods:'',equip:true,especial:true});
+const nova=()=>({nome:'',idade:16,nivel:5,exp:0,attr:{forca:1,destreza:1,sentidos:1,vigor:1,intelecto:1},san:null,atual:{vit:null,mana:null,est:null},protecao:0,pericias:{},custom:[],talentos:[],magias:[],habilidades:[],condicoes:[],itens:[GRIM()],grimOn:false});
+
+/* ===== Utilidades e estado ===== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const uid=()=>Math.random().toString(36).slice(2,10);
+const num=s=>{const m=String(s??'').match(/\d+/);return m?+m[0]:0};
+const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+let user=ls('rpg_user',''),tok=ls('rpg_tok',''),fichas=[],repo=[],grupos={},cur=null,S=null,tab='ficha',_go,es;
+const podeF=(f,u)=>f.dono===u||(f.acesso||[]).some(a=>a==='*'||a==='u:'+u||(a.startsWith('g:')&&((grupos[a.slice(2)]||{}).membros||[]).includes(u)));
+const can=()=>!!(cur&&user&&podeF(cur,user));
+async function api(p,b){const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'content-type':'application/json','x-token':tok},body:b?JSON.stringify(b):undefined});if(r.status===401){sair();return null}if(!r.ok){toast('Sem permissão ou erro no servidor.');return null}const j=await r.json();if(b&&p!=='ficha')load();return j}
+function sair(){user='';tok='';cur=S=null;if(es)clearInterval(es);localStorage.setItem('rpg_user','""');localStorage.setItem('rpg_tok','""');render()}
+async function load(){if(!tok)return;const e=await api('estado');if(!e)return;fichas=e.fichas;repo=e.repo;grupos=e.grupos;if(cur){cur=fichas.find(f=>f.id===cur.id)||null;S=cur?cur.dados:null}render()}
+function conectar(){if(!tok)return;if(es)clearInterval(es);es=setInterval(()=>{const a=document.activeElement;if(document.hidden||$('#dlg').open||(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)))return;load()},4000)}
+const save=()=>{};
+const commit=()=>{if(cur&&can())api('ficha',{id:cur.id,dados:cur.dados,acesso:cur.acesso});render()};
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,3500)}
+function tryDo(fn,msg){const bak=JSON.stringify(S);fn();if(calc(S).rest<0){cur.dados=JSON.parse(bak);S=cur.dados;toast(msg||'Pontos de melhoria insuficientes.')}commit()}
+
+/* ===== Cálculos ===== */
+function calc(S){
+ const md={};
+ S.itens.forEach(i=>{if(i.equip)for(const m of String(i.mods||'').matchAll(/([A-Za-zÀ-ú]+)\s*([+-]\s*\d+)/g)){const k=norm(m[1]);md[k]=(md[k]||0)+parseInt(m[2].replace(/\s/g,''))}});
+ const g=S.grimOn?1:0,a={};ATTR.forEach(k=>a[k]=S.attr[k]+g+(md[k]||0));
+ const p=n=>S.pericias[n]||0,f5=n=>Math.floor(p(n)/5),M=k=>md[k]||0,lv=S.nivel,c={a};
+ c.vit=15+5*a.vigor+2*f5('Fortitude')+10*Math.floor(lv/5)+M('vitalidade');
+ c.def=10+S.protecao+M('protecao')+M('defesa');
+ c.per=10+a.sentidos+p('Sensações')+M('percepcao');
+ c.mana=5+2*a.intelecto+2*f5('Controle')+M('mana');
+ c.est=5+a.destreza+2*f5('Luta')+M('estamina');
+ c.carga=5+2*a.forca+2*f5('Atletismo')+M('carga');
+ c.sanAuto=2*a.intelecto+Math.floor(lv/5);
+ c.san=(S.san??c.sanAuto)+M('sanidade');c.temp=g?3:0;
+ c.peso=S.itens.reduce((s,i)=>s+(+i.peso||0),0);
+ c.total=2*lv;
+ c.gA=ATTR.reduce((s,k)=>s+2*(S.attr[k]-1),0);
+ c.somaP=Object.values(S.pericias).reduce((s,v)=>s+(+v||0),0);
+ c.gP=Math.ceil(c.somaP/5);
+ c.gT=TALC*S.talentos.length;
+ c.rest=c.total-c.gA-c.gP-c.gT;
+ return c;
+}
+const pr=m=>m.pr!==''&&m.pr!=null?m.pr:Math.ceil((num(m.dano)||num(m.custo))/(m.grim?3:5));
+const opts=()=>['Nível',...ATTR.map(k=>'Atributo '+AN[k]),...PER.flat(),...(S?S.custom:[])];
+function valReq(n,c){const k=ATTR.find(k=>'Atributo '+AN[k]===n);return n==='Nível'?S.nivel:k?c.a[k]:(S.pericias[n]||0)}
+function parseReqs(txt){const out=[];for(const l of String(txt||'').split('\n').map(s=>s.trim()).filter(Boolean)){const m=l.match(/^(.+?)\s+(-?\d+)$/);const n=m&&opts().find(o=>norm(o)===norm(m[1]));if(!n)return null;out.push({k:n,v:+m[2]})}return out}
+
+/* ===== Formulários (janela) ===== */
+const FD={
+ magia:[['nome','Nome'],['estrelas','Estrelas (nível)','n'],['custo','Custo'],['dano','Dano (opcional)'],['pr','PR (vazio = calcula sozinho)'],['desc','Descrição','t'],['efeito','Efeito','t'],['grim','Pertence ao grimório','c']],
+ item:[['nome','Nome'],['peso','Peso','n'],['custo','Custo'],['dano','Dano'],['mods','Altera atributos (ex.: forca+1, defesa+2)'],['desc','Descrição','t'],['efeito','Efeito','t']],
+ talento:[['nome','Nome'],['desc','Descrição','t'],['efeito','Efeito','t'],['reqs','Requisitos (opcional, um por linha: Luta 10, Atributo Força 2, Nível 10)','t']],
+ condicao:[['nome','Nome'],['desc','Descrição','t']],
+ info:[['nome','Título'],['desc','Texto','t']]};
+FD.habilidade=FD.magia.filter(f=>f[0]!=='grim');
+const RQ={magia:['nome','custo','desc','efeito'],habilidade:['nome','custo','desc','efeito'],item:['nome'],talento:['nome','desc','efeito'],condicao:['nome'],info:['nome','desc']};
+const TT={magia:'Magia',habilidade:'Habilidade',item:'Item',talento:'Talento',condicao:'Condição',info:'Informação'};
+const COL={magia:'magias',habilidade:'habilidades',item:'itens',talento:'talentos',condicao:'condicoes'};
+function picker(t,go){const L=repo.filter(r=>r.tipo===t);if(!L.length)return go();
+ const f=$('#frm');f.onsubmit=e=>e.preventDefault();
+ f.innerHTML=`<h3 style="margin-top:0">📚 ${TT[t]}: já publicados</h3>`+L.map(r=>`<div class="cd"><div class="top"><b>${esc(r.dados.nome)}</b><span class="mut">por ${esc(r.autor)}</span></div><p>${esc(r.dados.desc)}</p><button type="button" data-act="usar" data-id="${r.id}">Usar este</button></div>`).join('')+'<div class="bt"><button type="button" class="sec" data-act="fechar">Cancelar</button><button type="button" data-act="zero">✍️ Criar do zero</button></div>';
+ $('#dlg').showModal()}
+function openForm(t,o,cb){
+ const f=$('#frm');
+ f.innerHTML=`<h3 style="margin-top:0">${TT[t]}</h3>`+FD[t].map(([k,l,ty])=>{
+  const v=k==='reqs'?(o.reqs||[]).map(r=>r.k+' '+r.v).join('\n'):(o[k]??(k==='estrelas'?1:''));
+  return ty==='c'?`<label class="ck"><input type="checkbox" name="${k}" ${v?'checked':''}> ${l}</label>`
+   :`<label>${l}${ty==='t'?`<textarea name="${k}" rows="3">${esc(v)}</textarea>`:`<input name="${k}" ${ty==='n'?'type="number" step="any"':''} value="${esc(v)}">`}</label>`}).join('')
+  +'<div class="bt"><button type="button" class="sec" data-act="fechar">Cancelar</button><button>Salvar</button></div>';
+ f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),r={};
+  FD[t].forEach(([k,l,ty])=>{r[k]=ty==='c'?fd.get(k)==='on':ty==='n'?+fd.get(k):(fd.get(k)||'').trim()});
+  const falta=RQ[t].filter(k=>!r[k]).map(k=>FD[t].find(x=>x[0]===k)[1]);
+  if(falta.length)return alert('Preencha: '+falta.join(', ')+'.');
+  if(r.estrelas!==undefined)r.estrelas=Math.max(1,Math.round(r.estrelas)||1);
+  if(t==='talento'){const q=parseReqs(r.reqs);if(!q)return alert('Requisito inválido. Use por exemplo: Luta 10, Atributo Força 2 ou Nível 10.');r.reqs=q}
+  $('#dlg').close();cb(r)};
+ $('#dlg').showModal();
+}
+
+/* ===== Renderização ===== */
+const inp=(p,v,o='')=>`<input data-p="${p}" value="${esc(v)}" ${o}>`;
+const numi=(p,v,o='')=>`<input type="number" data-p="${p}" value="${v??''}" ${o}>`;
+const btn=(a,t,i,txt,cl='sec')=>`<button class="${cl}" data-act="${a}" data-t="${t}" data-i="${i}">${txt}</button>`;
+
+function skill(t,x,i){
+ const st='★'.repeat(x.estrelas+(t==='magias'&&S.grimOn?2:0));
+ return `<div class="cd"><div class="top"><b>${esc(x.nome)}</b><span class="star">${st}</span></div>
+ <p class="mut">💧 Custo ${esc(x.custo)}${x.dano?`, 💥 dano ${esc(x.dano)}`:''}, 🎯 PR ${pr(x)}${x.grim?', 📖 do grimório':''}</p>
+ <p>${esc(x.desc)}</p><p><i>✨ Efeito:</i> ${esc(x.efeito)}</p>
+ ${(x.versoes||[]).length?`<details><summary>🕰️ Versões anteriores (${x.versoes.length})</summary>${x.versoes.map(v=>`<p class="ver"><span class="star">${'★'.repeat(v.estrelas)}</span> ${esc(v.nome)}, custo ${esc(v.custo)}${v.dano?`, dano ${esc(v.dano)}`:''}, PR ${pr(v)}. ${esc(v.desc)} Efeito: ${esc(v.efeito)}</p>`).join('')}</details>`:''}
+ <div class="bt">${btn('edit',t,i,'✏️ Editar')}${btn('pub',t,i,'📤 Publicar no repositório')}${btn('rem',t,i,'🗑️ Remover','x')}</div></div>`;
+}
+
+function fichaHTML(){
+ if(!cur)return `<p>Abra uma ficha em “Fichas salvas” ou crie uma nova.</p><div class="bt"><button data-act="nova">➕ Nova ficha</button></div>`;
+ const c=calc(S);
+ const cu=(k,l,max,ic)=>{const v=Math.min(S.atual[k]??max,max);return `<div class="st ${k}"><span>${ic} ${l}</span><div>${numi('atual.'+k,v,`min="0" max="${max}"`)} / <b>${max}</b></div><div class="bar"><i style="width:${max>0?Math.max(0,Math.min(100,v/max*100)):0}%"></i></div></div>`};
+ const pts=`<section class="p"><h2>📊 Pontos de melhoria</h2><div class="g"><div class="st"><span>Total (2 por nível)</span><b>${c.total}</b></div><div class="st"><span>Gastos</span><b>${c.gA+c.gP+c.gT}</b></div><div class="st"><span>Restantes</span><b class="${c.rest<0?'bad':''}">${c.rest}</b></div></div>
+  <p class="mut">💪 Atributos: ${c.gA} (${ATTR.map(k=>AN[k]+' '+2*(S.attr[k]-1)).join(', ')})</p>
+  <p class="mut">🎯 Perícias: ${c.gP} (${c.somaP} pontos: ${[...PER.flat(),...S.custom].filter(n=>S.pericias[n]).map(n=>esc(n)+' '+S.pericias[n]).join(', ')||'nenhum'})</p>
+  <p class="mut">🌟 Talentos: ${c.gT} (${S.talentos.map(t=>esc(t.nome)).join(', ')||'nenhum'})</p></section>`;
+ const todasP=[...PER,...(S.custom.length?[S.custom]:[])];
+ const ocultas=S.magias.filter(m=>m.grim&&!S.grimOn).length;
+ return `<fieldset ${can()?'':'disabled'}>
+ ${can()?'':'<p class="aviso">Somente leitura: você não tem acesso de edição a esta ficha.</p>'}
+ <section class="p"><h2>📜 Identidade <span class="mut">Pontos de melhoria restantes: <b class="${c.rest<0?'bad':''}">${c.rest}</b> de ${c.total}</span></h2>
+  <div class="g"><label>📛 Nome${inp('nome',S.nome)}</label><label>🎂 Idade${numi('idade',S.idade,'min="0"')}</label><label>⭐ Nível${numi('nivel',S.nivel,'min="1"')}</label><label>🔥 EXP (5 = 1 nível)${numi('exp',S.exp,'min="0"')}</label></div>
+  <p class="mut">Gastos: atributos ${c.gA}, perícias ${c.gP}, talentos ${c.gT}. Cada nível concede 2 pontos.</p></section>
+
+ ${pts}
+ <section class="p"><h2>💪 Atributos base</h2><div class="g">
+  ${ATTR.map(k=>`<div class="at"><span>${AI[k]} ${AN[k]}</span><span class="ctl"><button class="sec" data-act="attr" data-k="${k}" data-d="-1" aria-label="Diminuir ${AN[k]}">−</button><b>${S.attr[k]}</b><button class="sec" data-act="attr" data-k="${k}" data-d="1" aria-label="Aumentar ${AN[k]}">+</button></span>${c.a[k]!==S.attr[k]?`<small>efetivo ${c.a[k]}</small>`:''}</div>`).join('')}
+  <label>🌙 Sanidade${numi('san',S.san,`placeholder="${c.sanAuto}"`)}<small>Total ${c.san}${c.temp?` (+${c.temp} temporária)`:''}</small></label></div>
+  <p class="mut">Subir um atributo custa 2 pontos de melhoria. O mínimo é −2 e cada ponto abaixo de 1 devolve 2 pontos. Sanidade vazia usa 2×intelecto + nível/5.</p></section>
+
+ <section class="p"><h2>🛡️ Atributos secundários</h2><div class="g">
+  ${cu('vit','Vitalidade',c.vit,'❤️')}
+  <div class="st"><span>🛡️ Defesa</span><b>${c.def}</b><label>Proteção${numi('protecao',S.protecao)}</label></div>
+  <div class="st"><span>👁️ Percepção</span><b>${c.per}</b></div>
+  ${cu('mana','Mana',c.mana,'🔮')}${cu('est','Estamina',c.est,'⚡')}
+  <div class="st"><span>🎒 Carga</span><b class="${c.peso>c.carga?'bad':''}">${c.peso} / ${c.carga}</b> ${c.peso>c.carga?'<span class="tag">⚠️ Sobrecarga</span>':''}</div></div></section>
+
+ <section class="p"><h2>🎯 Perícias <span class="mut">${c.somaP} pontos (${c.gP} de melhoria), máximo ${PMAX} cada</span></h2>
+  <div class="pg">${todasP.map((gr,gi)=>`<div class="pc"><span class="gi">${GI[gi]}</span>${gr.map(n=>`<label class="pr">${esc(n)}${numi('pericias.'+n,S.pericias[n]||0,`min="0" max="${PMAX}"`)}${gi===PER.length?`<button class="x" data-act="delper" data-n="${esc(n)}" aria-label="Apagar perícia">🗑️</button>`:''}</label>`).join('')}</div>`).join('')}</div>
+  <div class="bt"><input id="np" placeholder="Nome de uma nova perícia"><button data-act="addper">➕ Adicionar perícia</button></div>
+  <p class="mut">Cada ponto de melhoria vale 5 pontos de perícia, em uma ou várias.</p></section>
+
+ <section class="p"><h2>🌟 Talentos <button data-act="novo" data-t="talento">🌟 Criar talento (${TALC} pontos)</button></h2>
+  ${S.talentos.map((t,i)=>`<div class="cd"><b>${esc(t.nome)}</b><p>${esc(t.desc)}</p><p><i>✨ Efeito:</i> ${esc(t.efeito)}</p>${(t.reqs||[]).length?`<p class="mut">🔒 Requisitos: ${t.reqs.map(q=>esc(q.k)+' '+q.v).join(', ')}</p>`:''}<div class="bt">${btn('rem','talento',i,'🗑️ Remover','x')}</div></div>`).join('')||'<p class="mut">Nenhum talento.</p>'}</section>
+
+ <section class="p"><h2>✨ Magias <button data-act="novo" data-t="magia">✨ Nova magia</button></h2>
+  ${S.magias.map((x,i)=>x.grim&&!S.grimOn?'':skill('magia',x,i)).join('')||'<p class="mut">Nenhuma magia.</p>'}
+  ${ocultas?`<p class="mut">${ocultas} magia(s) do grimório ocultas porque ele está desligado.</p>`:''}</section>
+
+ <section class="p"><h2>⚔️ Habilidades <button data-act="novo" data-t="habilidade">⚔️ Nova habilidade</button></h2>
+  ${S.habilidades.map((x,i)=>skill('habilidade',x,i)).join('')||'<p class="mut">Nenhuma habilidade.</p>'}</section>
+
+ <section class="p"><h2>🌀 Condições <button data-act="novo" data-t="condicao">🌀 Nova condição</button></h2>
+  ${S.condicoes.map((x,i)=>`<div class="cd"><div class="top"><b>${esc(x.nome)}</b>${btn('rem','condicao',i,'🗑️ Remover','x')}</div><p>${esc(x.desc)}</p></div>`).join('')||'<p class="mut">Nenhuma condição.</p>'}</section>
+
+ <section class="p"><h2>🎒 Itens <button data-act="novo" data-t="item">🎒 Novo item</button></h2>
+  ${S.itens.map((x,i)=>`<div class="cd"><div class="top"><b>${esc(x.nome)}</b><span class="mut">⚖️ peso ${esc(x.peso)}</span></div>
+   <p class="mut">${x.custo?`Custo ${esc(x.custo)}. `:''}${x.dano?`Dano ${esc(x.dano)}. `:''}${x.mods?`Altera: ${esc(x.mods)}`:''}</p>
+   <p>${esc(x.desc)}</p><p><i>✨ Efeito:</i> ${esc(x.efeito)}</p>
+   <div class="bt">${x.especial?`<label class="ck"><input type="checkbox" data-p="grimOn" ${S.grimOn?'checked':''}> 📖 Grimório ligado</label>`:`<label class="ck"><input type="checkbox" data-p="itens.${i}.equip" ${x.equip?'checked':''}> ✅ Equipado</label>`}
+   ${btn('edit','item',i,'✏️ Editar')}${x.especial?'':btn('rem','item',i,'🗑️ Remover','x')}</div></div>`).join('')}</section>
+ </fieldset>`;
+}
+
+const gruposHTML=()=>`<h3>👥 Grupos</h3><div class="bt"><input id="gn" placeholder="Nome do grupo"><input id="gm" placeholder="Membros, separados por vírgula"><button data-act="grupo">Salvar grupo</button></div>`+Object.entries(grupos).map(([n,g])=>`<p class="mut">👥 ${esc(n)} (dono ${esc(g.dono)}): ${g.membros.map(esc).join(', ')}</p>`).join('');
+function fichasHTML(){
+ if(!user)return '<p>Entre com seu nome para ver e criar fichas.</p>';
+ return `<div class="bt"><button data-act="nova">➕ Nova ficha</button></div><h3>🗂️ Fichas neste navegador</h3><div class="g2">`+(fichas.map(f=>{
+  const dono=f.dono===user,ed=podeF(f,user);
+  return `<div class="cd"><div class="top"><b>${esc(f.dados.nome||'Sem nome')}</b><span class="mut">nível ${f.dados.nivel}</span></div>
+  <p class="mut">Dono: ${esc(f.dono)}. Acesso de edição: ${f.acesso.length?f.acesso.map(n=>esc(n==='*'?'todos':n.replace('u:','').replace('g:','grupo '))+(dono?` <button class="x" data-act="unshare" data-id="${f.id}" data-n="${esc(n)}" aria-label="Remover acesso de ${esc(n)}">×</button>`:'')).join(', '):'só o dono'}</p>
+  <div class="bt"><button data-act="abrir" data-id="${f.id}">${ed?'Editar':'Ver'}</button>
+  ${dono?`<select id="st-${f.id}" aria-label="Tipo de acesso"><option value="u">👤 Usuário</option><option value="g">👥 Grupo</option><option value="*">🌍 Todos</option></select><input id="sh-${f.id}" placeholder="Nome do usuário ou grupo"><button class="sec" data-act="share" data-id="${f.id}">Liberar</button><button class="x" data-act="del" data-id="${f.id}">Excluir</button>`:''}</div></div>`}).join('')||'<p class="mut">Nenhuma ficha ainda.</p>')+'</div>'+gruposHTML();
+}
+
+const pubHTML=()=>!cur?'<section class="p"><h2>📤 Publicar</h2><p class="mut">Abra uma ficha para publicar o que há nela. Talentos criados já são publicados automaticamente.</p></section>':`<section class="p"><h2>📤 Publicar da ficha aberta</h2><div class="bt"><button data-act="pubficha">🧑‍🎤 Publicar esta ficha inteira</button></div>${[['magia','magias','✨ Magias'],['habilidade','habilidades','⚔️ Habilidades'],['item','itens','🎒 Itens'],['condicao','condicoes','🌀 Condições']].map(([t,c,l])=>`<h3>${l}</h3><div class="bt">${S[c].map((x,i)=>x.especial?'':`<button class="sec" data-act="pub" data-t="${t}" data-i="${i}">📤 ${esc(x.nome)}</button>`).join('')||'<span class="mut">Nada para publicar.</span>'}</div>`).join('')}</section>`;
+function repoHTML(){
+ const grupos=[['info','ℹ️ Informações'],['magia','✨ Magias genéricas'],['habilidade','⚔️ Habilidades genéricas'],['talento','🌟 Talentos'],['item','🎒 Itens genéricos'],['condicao','🌀 Condições genéricas'],['ficha','🧑‍🎤 Fichas publicadas']];
+ return pubHTML()+`<div class="bt">${grupos.filter(g=>g[0]!=='ficha').map(([t])=>`<button class="sec" data-act="repo-novo" data-t="${t}" ${user?'':'disabled'}>Adicionar ${TT[t].toLowerCase()}</button>`).join('')}</div>`
+ +grupos.map(([t,tit])=>`<h3>${tit}</h3>`+(repo.filter(r=>r.tipo===t).map(r=>{const x=r.dados;
+  return `<div class="cd"><div class="top"><b>${esc(x.nome)}</b><span class="mut">por ${esc(r.autor)}</span></div><p>${esc(x.desc)}</p>
+  ${x.efeito?`<p><i>✨ Efeito:</i> ${esc(x.efeito)}</p>`:''}
+  ${x.custo?`<p class="mut">Custo ${esc(x.custo)}${x.dano?`, dano ${esc(x.dano)}`:''}${x.estrelas?`, <span class="star">${'★'.repeat(x.estrelas)}</span>`:''}</p>`:''}
+  ${t==='talento'&&(x.reqs||[]).length?`<p class="mut">🔒 Requisitos: ${x.reqs.map(q=>esc(q.k)+' '+q.v).join(', ')}</p>`:''}
+  <div class="bt">${t!=='info'?`<button data-act="repo-add" data-id="${r.id}" ${t==='ficha'||can()?'':'disabled'}>${t==='ficha'?'Copiar para minhas fichas':'Adicionar à ficha aberta'}</button>`:''}${r.autor===user?`<button class="x" data-act="repo-del" data-id="${r.id}">Excluir</button>`:''}</div></div>`}).join('')||'<p class="mut">Vazio.</p>')).join('');
+}
+
+function render(){
+ $('#quem').innerHTML=location.protocol==='file:'?'<span class="bad">⚠️ Abra pelo endereço do site (Netlify), não pelo arquivo.</span>':user?`<span>${esc(user)}</span><button class="sec" data-act="sair">Sair</button>`:'<input id="nu" placeholder="Seu nome" aria-label="Seu nome"><input id="ns" type="password" placeholder="Senha" aria-label="Senha"><button class="sec" data-act="login">Entrar ou criar conta</button>';
+ document.querySelectorAll('header nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+ ['ficha','fichas','repo'].forEach(t=>$('#'+t).hidden=t!==tab);
+ if(tab==='ficha')$('#ficha').innerHTML=user?fichaHTML():'<p>Digite seu nome no topo para entrar e criar fichas.</p>';
+ if(tab==='fichas')$('#fichas').innerHTML=fichasHTML();
+ if(tab==='repo')$('#repo').innerHTML=repoHTML();
+}
+
+/* ===== Eventos ===== */
+$('#ficha').addEventListener('change',e=>{
+ const el=e.target,p=el.dataset.p;if(!p||!can())return;
+ let v=el.type==='checkbox'?el.checked:el.value;
+ if(el.type==='number'){v=el.value===''?null:+el.value;if(v!==null){if(el.min!=='')v=Math.max(v,+el.min);if(el.max!=='')v=Math.min(v,+el.max)}}
+ if(v===null&&!/^(san|atual\.)/.test(p))v=0;
+ const apply=()=>{const ks=p.split('.');let o=S;ks.slice(0,-1).forEach(k=>o=o[k]);o[ks[ks.length-1]]=v};
+ if(p==='nivel'){apply();commit()}else if(p==='exp'){apply();const g=Math.floor(S.exp/5);if(g>0){S.nivel+=g;S.exp%=5;toast('⬆️ Subiu '+g+' nível(is)!')}commit()}else tryDo(apply);
+});
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const d=b.dataset,a=d.act;
+ if(a==='tab'){tab=d.t;render()}
+ else if(a==='fechar')$('#dlg').close();
+ else if(a==='login'){const n=$('#nu').value.trim(),s=$('#ns').value;if(n&&s)fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({nome:n,senha:s})}).then(r=>r.json()).then(r=>{if(!r.token)return toast(r.erro||'Falha no login.');user=n;tok=r.token;localStorage.setItem('rpg_user',JSON.stringify(n));localStorage.setItem('rpg_tok',JSON.stringify(tok));conectar();load()}).catch(()=>toast('Não consegui falar com o servidor. Confira sua conexão e se o site foi publicado no Netlify.'))}
+ else if(a==='sair')sair();
+ else if(a==='nova'){if(!user)return toast('Entre com seu nome primeiro.');cur={id:uid(),dono:user,acesso:[],dados:nova(),upd:Date.now()};fichas.push(cur);S=cur.dados;tab='ficha';commit()}
+ else if(a==='abrir'){cur=fichas.find(f=>f.id===d.id);S=cur.dados;tab='ficha';render()}
+ else if(a==='del'){const f=fichas.find(f=>f.id===d.id);if(f.dono===user&&confirm('Excluir esta ficha?')){api('ficha/del',{id:f.id});fichas=fichas.filter(x=>x!==f);if(cur===f)cur=S=null;render()}}
+ else if(a==='share'){const f=fichas.find(f=>f.id===d.id),t=$('#st-'+d.id).value,n=$('#sh-'+d.id).value.trim(),k=t==='*'?'*':t+':'+n;if(f.dono===user&&(t==='*'||n)&&!f.acesso.includes(k)){f.acesso.push(k);api('ficha',{id:f.id,dados:f.dados,acesso:f.acesso});render()}}
+ else if(a==='grupo'){api('grupo',{nome:$('#gn').value.trim(),membros:$('#gm').value.split(',').map(s=>s.trim())})}
+ else if(a==='unshare'){const f=fichas.find(f=>f.id===d.id);if(f.dono===user){f.acesso=f.acesso.filter(n=>n!==d.n);api('ficha',{id:f.id,dados:f.dados,acesso:f.acesso});render()}}
+ else if(a==='repo-novo'){openForm(d.t,{},o=>{api('repo',{id:uid(),tipo:d.t,dados:o})})}
+ else if(a==='repo-del'){const r=repo.find(r=>r.id===d.id);if(r.autor===user){api('repo/del',{id:r.id});repo=repo.filter(x=>x!==r);render()}}
+ else if(a==='repo-add'&&repo.find(r=>r.id===d.id).tipo==='ficha'){const r=repo.find(r=>r.id===d.id);cur={id:uid(),dono:user,acesso:[],dados:JSON.parse(JSON.stringify(r.dados.ficha)),upd:Date.now()};fichas.push(cur);S=cur.dados;tab='ficha';commit()}
+ else if(a==='pubficha'&&S){api('repo',{id:uid(),tipo:'ficha',dados:{nome:S.nome||'Sem nome',desc:'Nível '+S.nivel,ficha:JSON.parse(JSON.stringify(S))}});toast('Ficha publicada no repositório.')}
+ else if(a==='repo-add'&&can()){
+  const r=repo.find(r=>r.id===d.id),x=JSON.parse(JSON.stringify(r.dados));
+  if(r.tipo==='talento'){
+   const c=calc(S),falta=(x.reqs||[]).filter(q=>valReq(q.k,c)<q.v);
+   if(falta.length)return toast('Requisitos não cumpridos: '+falta.map(q=>q.k+' '+q.v).join(', ')+'.');
+   if(S.talentos.some(t=>norm(t.nome)===norm(x.nome)))return toast('Você já tem esse talento.');
+   tryDo(()=>S.talentos.push(x),'Pontos insuficientes para pegar o talento (3).');
+  }else{x.versoes=[];if(r.tipo==='item')x.equip=false;S[COL[r.tipo]].push(x);commit()}
+ }
+ else if(can()||a==='pub'){
+  if(a==='attr')tryDo(()=>{S.attr[d.k]=Math.max(-2,S.attr[d.k]+ +d.d)});
+  else if(a==='addper'){
+   const n=$('#np').value.trim().replace(/\./g,'');
+   if(!n)return;if(opts().some(o=>norm(o)===norm(n)))return toast('Essa perícia já existe.');
+   S.custom.push(n);commit();
+  }
+  else if(a==='novo'){
+   const go=_go=()=>openForm(d.t,{},o=>{
+    if(d.t==='talento'){
+     const n=S.talentos.length;tryDo(()=>S.talentos.push(o),'Pontos insuficientes para criar o talento (3).');
+     if(S.talentos.length>n){api('repo',{id:uid(),tipo:'talento',dados:o})}
+    }else{if(d.t==='item')o.equip=false;if(o.estrelas)o.versoes=[];S[COL[d.t]].push(o);commit()}
+   });
+   ['magia','habilidade','item','condicao'].includes(d.t)?picker(d.t,go):go();
+  }
+  else if(a==='usar'){const r=repo.find(r=>r.id===d.id),x=JSON.parse(JSON.stringify(r.dados));$('#dlg').close();x.versoes=[];if(r.tipo==='item')x.equip=false;S[COL[r.tipo]].push(x);commit()}
+  else if(a==='zero'){$('#dlg').close();_go()}
+  else if(a==='edit'){
+   const col=COL[d.t],old=S[col][+d.i];
+   openForm(d.t,old,o=>{
+    const nv={...old,...o};
+    if(o.estrelas!==undefined&&o.estrelas!==old.estrelas)nv.versoes=[...(old.versoes||[]),{...old,versoes:undefined}];
+    S[col][+d.i]=nv;commit();
+   });
+  }
+  else if(a==='delper'){S.custom=S.custom.filter(x=>x!==d.n);delete S.pericias[d.n];commit()}
+  else if(a==='rem'){const col=COL[d.t];if(!S[col][+d.i].especial){S[col].splice(+d.i,1);commit()}}
+  else if(a==='pub'){const x={...S[COL[d.t]][+d.i],versoes:undefined,grim:false};api('repo',{id:uid(),tipo:d.t,dados:x});toast('Publicado no repositório.')}
+ }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='nu'||e.target.id==='ns'))document.querySelector('[data-act=login]').click()});
+render();load();conectar();
+</script>
+</body>
+</html>
